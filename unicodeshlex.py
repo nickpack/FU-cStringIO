@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 """A lexical analyzer class for simple shell-like syntaxes."""
 
 # Module and documentation by Eric S. Raymond, 21 Dec 1998
@@ -33,11 +33,11 @@ class shlex:
         else:
             self.eof = ''
         self.commenters = '#'
-        self.wordchars = ('abcdfeghijklmnopqrstuvwxyz'
-                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_')
+        self.wordchars = (u'abcdfeghijklmnopqrstuvwxyz'
+                          u'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_')
         if self.posix:
-            self.wordchars += ('ßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ'
-                               'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ')
+            self.wordchars += (u'ßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ'
+                               u'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞ')
         self.whitespace = ' \t\r\n'
         self.whitespace_split = False
         self.quotes = '\'"'
@@ -121,7 +121,7 @@ class shlex:
         while True:
             nextchar = self.instream.read(1)
             if nextchar == '\n':
-                self.lineno = self.lineno + 1
+                self.lineno += 1
             if self.debug >= 3:
                 print "shlex: in state", repr(self.state), \
                       "I see character:", repr(nextchar)
@@ -141,7 +141,7 @@ class shlex:
                         continue
                 elif nextchar in self.commenters:
                     self.instream.readline()
-                    self.lineno = self.lineno + 1
+                    self.lineno += 1
                 elif self.posix and nextchar in self.escape:
                     escapedstate = 'a'
                     self.state = nextchar
@@ -191,7 +191,7 @@ class shlex:
                 # character may be escaped within quotes.
                 if escapedstate in self.quotes and \
                    nextchar != self.state and nextchar != escapedstate:
-                    self.token = self.token + self.state
+                    self.token += self.state
                 self.token = self.token + nextchar
                 self.state = escapedstate
             elif self.state == 'a':
@@ -208,7 +208,7 @@ class shlex:
                         continue
                 elif nextchar in self.commenters:
                     self.instream.readline()
-                    self.lineno = self.lineno + 1
+                    self.lineno += 1
                     if self.posix:
                         self.state = ' '
                         if self.token or (self.posix and quoted):
@@ -250,7 +250,7 @@ class shlex:
         # This implements cpp-like semantics for relative-path inclusion.
         if isinstance(self.infile, basestring) and not os.path.isabs(newfile):
             newfile = os.path.join(os.path.dirname(self.infile), newfile)
-        return (newfile, open(newfile, "r"))
+        return newfile, open(newfile, "r")
 
     def error_leader(self, infile=None, lineno=None):
         "Emit a C-compiler-like, Emacs-friendly error-message leader."
